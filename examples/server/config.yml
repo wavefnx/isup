@@ -1,0 +1,36 @@
+interval: 5000ms
+
+client:
+  request_timeout: 250ms
+  pool_idle_timeout: 60s
+
+store: { type: memory }
+
+# store:
+#   type: redis
+#   connection: redis://localhost:6379
+#
+# In order to use redis as a storage:
+# 1. uncomment the redis `store` block above and remove the memory `store` block
+#
+# start a redis instance with docker
+# 2. docker run --rm -p 6379:6379 redis
+#
+# execute the example with the `redis` feature enabled
+# 3. cargo run --example server --features redis
+
+strategy:
+  type: weighted_log
+  weight: 0.55
+  effort: 10.0
+
+requests:
+  - url: https://eth.public-rpc.com
+    method: POST
+    headers: { content-type: application/json }
+    body: { jsonrpc: 2.0, method: eth_blockNumber, params: [], id: 1 }
+
+  - url: https://cloudflare-eth.com
+    method: POST
+    headers: { content-type: application/json }
+    body: { jsonrpc: 2.0, method: eth_blockNumber, params: [], id: 1 }

@@ -1,0 +1,6 @@
+# Endpoints to be scored
+requests:
+  - url: https://example.com
+    method: GET
+  - url: https://rust-lang.org
+    method: GET

@@ -1,0 +1,90 @@
+# Description: Example configuration file for the `isup` service
+#
+# Interval (optional)
+# ----------------
+# The time between requests when executing the `run(interval)` function.
+#
+# [!info] All durations can be expressed in human-readable format (250ms, 5sec, 1 minute, 2 hours, ...)
+#
+# For demonstational purposes and for this example, the value is set to 5000ms.
+# It's advisable to never use low intervals, especially in a production environment or against servers that are owned by others.
+interval: 5000ms
+
+# Client (optional)
+# ----------------
+# Customization specific to the underlying request client.
+#
+# The `request_timeout` field is used to define the maximum time a request can take before it's considered failed, impacting it's score.
+# The `pool_idle_timeout` field is used to define the maximum time a connection can be idle before it's closed.
+#
+# If the interval is set but the client configuration is not:
+# - the `request_timeout` will be set to the interval value
+# - the `pool_idle_timeout` will be set to underlying hyper client's default value (90s)
+#
+# If no interval and no client configuration is set:
+# - the `request_timeout` will be set to underlying hyper client's default value (never)
+# - the `pool_idle_timeout` will be set to the underlying hyper client's default value (90s)
+client: 
+  request_timeout: 250ms
+  pool_idle_timeout: 60 seconds # human-readable format
+
+# Store (optional)
+# ----------------
+# Definition and connection to the score storage.
+#
+# [!info] When in production, you would want to load sensitive data in a secure manner, that can be done programmatically
+# using the `store::Redis::from_url(REDIS_ENV_URL)` or by getting the value from a secure secret storage.
+#
+# In order to use Redis as a storage, the `redis` feature must be enabled in the `Cargo.toml` file.
+# store:
+#   type: redis
+#   connection: redis://localhost:6379
+#
+# For the default, in-memory storage, that would be:
+store:
+  type: memory
+
+# Strategy (optional)
+# ----------------
+# Definition and customization of the strategy used to calculate the score.
+#
+# Current default is set to `weighted_log` with the following configuration:
+strategy: 
+  type: weighted_log
+  # A value of `weight` closer to 0.0 will give importance to historical scores, while a value closer to 1.0 will give importance to future scores.
+  weight: 0.5
+  # The `effort` parameter determines the amount of effort a service will require to recover back to it's current score after a failure.
+  # The `default` in this case is set to 10.0, meaning that there will be 10x reduction in the reliability of the service after a failure.
+  effort: 10.0
+
+# Requests
+# ----------------
+# List of endpoints to be observed and scored.
+#
+# [!info] headers and body can be defined either in blocks or structure formats
+#
+requests:
+  # the url to be requested
+  - url: https://ethereum-rpc.publicnode.com
+    # the method to be used in the request
+    method: POST
+    # the headers to be used in the request (optional)
+    headers: { content-type: application/json, user-agent: example/1.0 }
+    # the body to be used in the request (optional)
+    body: { jsonrpc: 2.0, method: eth_blockNumber, params: [], id: 1 }
+  # ...
+  - url: https://eth.public-rpc.com
+    method: POST # GET | PUT | DELETE | PATCH | OPTIONS | HEAD
+    # the headers to be used in the request (optional)
+    headers: { content-type: application/json }
+    # the body to be used in the request (optional)
+    body: { jsonrpc: 2.0, method: eth_blockNumber, params: [], id: 1 }
+  # ...
+  - url: https://cloudflare-eth.com
+    # the method to be used in the request
+    method: POST # GET | PUT | DELETE | PATCH | OPTIONS | HEAD
+    # addtitionally, headers and body can be defined as maps or as
+    headers: { content-type: application/json }
+    # the body to be used in the request (optional)
+    body: { jsonrpc: 2.0, method: eth_blockNumber, params: [], id: 1 }
+  # ...
