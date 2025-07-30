@@ -8,7 +8,7 @@ license = "MPL-2.0"
 [dependencies]
 # Asynchronous Runtime and Utilities
 # -----------------------------------
-tokio = { version = "1.36.0", features = ["rt-multi-thread", "macros", "time"] }
+tokio = { version = "1.38.2", features = ["rt-multi-thread", "macros", "time"] }
 async-trait = "0.1.77"
 futures = "0.3.30"
 
